@@ -75,8 +75,14 @@
     }
 
     async function init() {
+        if (!('animationWorklet' in CSS)) {
+            console.log("You need AnimationWorklet to see this demo :(")
+            return
+        }
         await CSS.animationWorklet.addModule(urlFromTag("script[language='javascript+animationworklet']"));
-        const effect = new KeyframeEffect(
+
+        const waapiAnimation = new Animation(
+            new KeyframeEffect(
             document.querySelector('#a'),
             [
                 {
@@ -90,12 +96,27 @@
                 duration: 2000,
                 iterations: Number.POSITIVE_INFINITY
             }
-        )
-
-        const waapiAnimation = new Animation(effect, document.timeline)
+        ),
+            document.timeline)
         waapiAnimation.play()
 
-        const workletAnimation = new WorkletAnimation('move', effect, document.timeline)
+        const workletAnimation = new WorkletAnimation('move',
+            new KeyframeEffect(
+                document.querySelector('#b'),
+                [
+                    {
+                        transform: 'translateX(0)'
+                    },
+                    {
+                        transform: 'translateX(500px)'
+                    }
+                ],
+                {
+                    duration: 2000,
+                    iterations: Number.POSITIVE_INFINITY
+                }
+            ),
+            document.timeline)
         workletAnimation.play()
     }
 

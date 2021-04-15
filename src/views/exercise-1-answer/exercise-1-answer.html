@@ -102,25 +102,44 @@
             return
         }
         await CSS.animationWorklet.addModule(urlFromTag("script[language='javascript+animationworklet']"));
-        const effect = new KeyframeEffect(
-            document.querySelector('#a'),
-            [
+        new WorkletAnimation(
+            'factor',
+            new KeyframeEffect(
+                document.querySelector('#a'),
+                [
+                    {
+                        transform: 'translateX(0)'
+                    },
+                    {
+                        transform: 'translateX(500px)'
+                    }
+                ],
                 {
-                    transform: 'translateX(0)'
-                },
-                {
-                    transform: 'translateX(500px)'
+                    duration: 2000,
+                    iterations: Number.POSITIVE_INFINITY
                 }
-            ],
-            {
-                duration: 2000,
-                iterations: Number.POSITIVE_INFINITY
-            }
-        )
+            ),
+            document.timeline).play();
 
-        new WorkletAnimation('factor', effect, document.timeline).play();
-
-        new WorkletAnimation('factor', effect, document.timeline, {factor: 0.5}).play();
+        new WorkletAnimation(
+            'factor',
+            new KeyframeEffect(
+                document.querySelector('#b'),
+                [
+                    {
+                        transform: 'translateX(0)'
+                    },
+                    {
+                        transform: 'translateX(500px)'
+                    }
+                ],
+                {
+                    duration: 2000,
+                    iterations: Number.POSITIVE_INFINITY
+                }
+            ),
+            document.timeline,
+            {factor: 0.5}).play();
     }
 
     init();

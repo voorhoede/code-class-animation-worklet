@@ -3,7 +3,6 @@
 {% block navigation %}
 <nav class="cc-navigation">
     <a href="/" class="cc-back-link">&#8592; back to overview</a>
-    <a href="/exercise-example-answer/" class="cc-answer-link">See answer &#8594;</a>
 </nav>
 {% endblock %}
 
@@ -62,19 +61,14 @@
 {% endblock %}
 
 {% block scripts %}
-<script language="javascript+animationworklet">
+<script language="javascript+animationworklet" type="javascript">
   registerAnimator('passthrough', class {
     animate(currentTime, effect) {
       effect.localTime = currentTime;
     }
   });
-
 </script>
 <script>
-    if (!('animationWorklet' in CSS)) {
-        document.write("You need AnimationWorklet to see this demo :(");
-    }
-
     function urlFromTag(sel) {
         const el = document.querySelector(sel);
         if (!el) {
@@ -85,11 +79,15 @@
     }
 
     async function init() {
+        if (!('animationWorklet' in CSS)) {
+            console.log("You need AnimationWorklet to see this demo :(")
+            return
+        }
         await CSS.animationWorklet.addModule(urlFromTag("script[language='javascript+animationworklet']"));
         const timeline = new ScrollTimeline({
             scrollSource: document.scrollingElement,
             orientation: "block", // "inline" or "block".
-            timeRange: 5000
+            timeRange: 999
         });
         for (const div of document.querySelectorAll('div')) {
             new WorkletAnimation(
@@ -105,7 +103,7 @@
                         }
                     ],
                     {
-                        duration: 5000,
+                        duration: 1000,
                         fill: 'both'
                     }
                 ),
