@@ -27,5 +27,5 @@ This wil build the project, start the server and start the watcher. The project 
 available on [localhost:3000](http://localhost:3000). The watcher task will automatically
 build assets, styles and views. The server will be reloaded on every change.
 
-Before you can use the Animation Worklet, you will have to enable the experimental features flag in chrome,
- go to [chrome://flags/#enable-experimental-web-platform-features](chrome://flags/#enable-experimental-web-platform-features) and enable it
+__Before you can use the Animation Worklet, you will have to enable the experimental features flag in chrome,
+ go to [chrome://flags/#enable-experimental-web-platform-features](chrome://flags/#enable-experimental-web-platform-features) and enable it__
