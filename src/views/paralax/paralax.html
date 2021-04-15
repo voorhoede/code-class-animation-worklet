@@ -1,0 +1,119 @@
+{% extends "views/_base/base.html" %}
+
+{% block navigation %}
+<nav class="cc-navigation">
+    <a href="/" class="cc-back-link">&#8592; back to overview</a>
+    <a href="/exercise-example-answer/" class="cc-answer-link">See answer &#8594;</a>
+</nav>
+{% endblock %}
+
+{% block introduction %}
+{# TODO: add title and description of exercise #}
+<h1>Paralax</h1>
+<p>An example of paralax scrolling using a worklet and ScrollTimeLine</p>
+{% endblock %}
+
+{% block html %}
+<section>
+    <section class="content">
+        Content
+    </section>
+    <div class="paralax" style="background-image: url(https://source.unsplash.com/random/2000x2000)">
+
+    </div>
+    <section class="content">
+        Content
+    </section>
+    <div class="paralax" style="background-image: url(https://source.unsplash.com/random/2000x2001)">
+
+    </div>
+    <section class="content">
+        Content
+    </section>
+    <div class="paralax" style="background-image: url(https://source.unsplash.com/random/2000x2002)">
+
+    </div>
+    <section class="content">
+        Content
+    </section>
+</section>
+{% endblock %}
+
+{% block styles %}
+<style type="text/css">
+    .content {
+        position: relative;
+        background-color: white;
+        height: 500px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9;
+    }
+
+    .paralax {
+        position: relative;
+        height: 1000px;
+        background-size: cover;
+        margin-top: -500px;
+        z-index: 0;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script language="javascript+animationworklet">
+  registerAnimator('passthrough', class {
+    animate(currentTime, effect) {
+      effect.localTime = currentTime;
+    }
+  });
+
+</script>
+<script>
+    if (!('animationWorklet' in CSS)) {
+        document.write("You need AnimationWorklet to see this demo :(");
+    }
+
+    function urlFromTag(sel) {
+        const el = document.querySelector(sel);
+        if (!el) {
+            throw new Error("Couldn't find element");
+        }
+        const blob = new Blob([el.textContent], {type: "text/javascript"});
+        return URL.createObjectURL(blob);
+    }
+
+    async function init() {
+        await CSS.animationWorklet.addModule(urlFromTag("script[language='javascript+animationworklet']"));
+        const timeline = new ScrollTimeline({
+            scrollSource: document.scrollingElement,
+            orientation: "block", // "inline" or "block".
+            timeRange: 5000
+        });
+        for (const div of document.querySelectorAll('div')) {
+            new WorkletAnimation(
+                'passthrough',
+                new KeyframeEffect(
+                    div,
+                    [
+                        {
+                            transform: 'translateY(0)'
+                        },
+                        {
+                            transform: 'translateY(500px)'
+                        }
+                    ],
+                    {
+                        duration: 5000,
+                        fill: 'both'
+                    }
+                ),
+                timeline
+            ).play();
+        }
+    }
+
+    init();
+</script>
+{% endblock %}

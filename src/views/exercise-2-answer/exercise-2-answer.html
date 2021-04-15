@@ -2,94 +2,100 @@
 
 {% block navigation %}
 <nav class="cc-navigation">
-	<a href="/" class="cc-back-link">&#8592; back to overview</a>
-	<a href="/exercise-example-answer/" class="cc-answer-link">See answer &#8594;</a>
+    <a href="/" class="cc-back-link">&#8592; back to overview</a>
+    <a href="/paralax" class="cc-answer-link">See parallax example &#8594;</a>
 </nav>
 {% endblock %}
 
 {% block introduction %}
 {# TODO: add title and description of exercise #}
-<h1>[TITLE]</h1>
-<p>[DESCRIPTION]</p>
+<h1>ScrollTimeline</h1>
+<p>AnimationWorklet is designed to work with more than just time based animations</p>
+<p>A part of the spec is the ScrollTimeline, which maps its timeline to the minimum and maximum scroll position in a
+    selected element</p>
+<p>Change the current timeline to a ScrollTimeline so the color fades when you scroll down the page</p>
 {% endblock %}
 
 {% block html %}
-<section class="cc-html-playground">
-	<div class="block" id="a"></div>
-	<div class="scroll--container"><div class="scroll--content"></div></div>
+<section class="cc-html-playground container">
+    <div class="content"></div>
 </section>
 {% endblock %}
 
 {% block styles %}
 <style type="text/css">
-	.block {
-		width: 200px;
-		height: 200px;
-		background-color: hotpink;
-		border-radius: 5px;
-		margin-bottom: 10px;
-	}
-	.scroll--container {
-		width: 200px;
-		height: 200px;
-		border: 1px solid black;
-		overflow: auto;
-	}
-	.scroll--content {
-		height: 2000px;
-	}
+    .content {
+        height: 4000px;
+    }
 </style>
 {% endblock %}
 
 {% block scripts %}
-<script language="javascript+animationworklet">
-  registerAnimator('passthrough', class {
-    animate(currentTime, effect) {
-      effect.localTime = currentTime;
-    }
-  });
+<script language="javascript+animationworklet" type="javascript">
+    registerAnimator('color', class {
+        constructor(options, state = {}) {
+            this.prevTime = state.prevTime || 0;
+        }
+
+        animate(currentTime, effect) {
+            effect.localTime = currentTime
+            // if (this.prevTime > currentTime) {
+            //     effect.localTime = 1;
+            // } else if (this.prevTime < currentTime) {
+            //     effect.localTime = 1000;
+            // }
+            // this.prevTime = currentTime;
+        }
+
+        state() {
+            return {
+                prevTime: this.prevTime
+            }
+        }
+    });
 </script>
 <script>
-	if(!('animationWorklet' in CSS)) {
-		document.write("You need AnimationWorklet to see this demo :(");
-	}
+    function urlFromTag(sel) {
+        const el = document.querySelector(sel);
+        if (!el) {
+            throw new Error("Couldn't find element");
+        }
+        const blob = new Blob([el.textContent], {type: "text/javascript"});
+        return URL.createObjectURL(blob);
+    }
 
-	function urlFromTag(sel) {
-		const el = document.querySelector(sel);
-		if(!el) {
-			throw new Error("Couldn't find element");
-		}
-		const blob = new Blob([el.textContent], {type: "text/javascript"});
-		return URL.createObjectURL(blob);
-	}
+    async function init() {
+        if (!('animationWorklet' in CSS)) {
+            console.log("You need AnimationWorklet to see this demo :(")
+            return
+        }
+        await CSS.animationWorklet.addModule(urlFromTag("script[language='javascript+animationworklet']"));
 
-	async function init() {
-		await CSS.animationWorklet.addModule(urlFromTag("script[language='javascript+animationworklet']"));
+        const workletAnimation = new WorkletAnimation(
+            'color',
+            new KeyframeEffect(
+                document.querySelector('.container'),
+                [
+                    {
+                        backgroundColor: 'white'
+                    },
+                    {
+                        backgroundColor: 'hotpink'
+                    }
+                ],
+                {
+                    duration: 1001,
+                    easing: 'ease-in-out'
+                }
+            ),
+            new ScrollTimeline({
+                scrollSource: document.querySelector('html'),
+                timeRange: 1000
+            }),
+        )
+        workletAnimation.play()
+    }
 
-		new WorkletAnimation(
-			'passthrough',
-			new KeyframeEffect(
-				document.querySelector('#a'),
-				[
-					{
-						transform: 'translateX(0)'
-					},
-					{
-						transform: 'translateX(500px)'
-					}
-				],
-				{
-					duration: 2000,
-					fill: 'both'
-				}
-			),
-			new ScrollTimeline({
-				scrollSource: document.querySelector('.scroll--container'),
-				orientation: "vertical", // "horizontal" or "vertical".
-				timeRange: 2000
-			})
-		).play();
-	}
-	init();
+    init();
 </script>
 {% endblock %}

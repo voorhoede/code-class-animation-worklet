@@ -55,8 +55,9 @@
 {% block scripts %}
 <script language="javascript+animationworklet" type="javascript">
     function remap(minIn, maxIn, minOut, maxOut, v) {
-        return (v - minIn)/(maxIn - minIn) * (maxOut - minOut) + minOut;
+        return (v - minIn) / (maxIn - minIn) * (maxOut - minOut) + minOut;
     }
+
     registerAnimator('move', class {
         animate(currentTime, effect) {
             effect.localTime = remap(-1, 1, 0, 2000, Math.sin(currentTime * 2 * Math.PI / 2000))
@@ -64,10 +65,6 @@
     });
 </script>
 <script>
-    if (!('animationWorklet' in CSS)) {
-        document.write("You need AnimationWorklet to see this demo :(");
-    }
-
     function urlFromTag(sel) {
         const el = document.querySelector(sel);
         if (!el) {
@@ -79,46 +76,26 @@
 
     async function init() {
         await CSS.animationWorklet.addModule(urlFromTag("script[language='javascript+animationworklet']"));
-
-        const waapiAnimation = new Animation(
-            new KeyframeEffect(
-                document.querySelector('#a'),
-                [
-                    {
-                        transform: 'translateX(0)'
-                    },
-                    {
-                        transform: 'translateX(500px)'
-                    }
-                ],
+        const effect = new KeyframeEffect(
+            document.querySelector('#a'),
+            [
                 {
-                    duration: 2000,
-                    iterations: Number.POSITIVE_INFINITY
+                    transform: 'translateX(0)'
+                },
+                {
+                    transform: 'translateX(500px)'
                 }
-            ),
-            document.timeline
+            ],
+            {
+                duration: 2000,
+                iterations: Number.POSITIVE_INFINITY
+            }
         )
+
+        const waapiAnimation = new Animation(effect, document.timeline)
         waapiAnimation.play()
 
-        const workletAnimation = new WorkletAnimation(
-            'move',
-            new KeyframeEffect(
-                document.querySelector('#b'),
-                [
-                    {
-                        transform: 'translateX(0)'
-                    },
-                    {
-                        transform: 'translateX(500px)'
-                    }
-                ],
-                {
-                    duration: 2000,
-                    iterations: Number.POSITIVE_INFINITY
-                }
-            ),
-            document.timeline
-        )
+        const workletAnimation = new WorkletAnimation('move', effect, document.timeline)
         workletAnimation.play()
     }
 
